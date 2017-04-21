@@ -7,12 +7,19 @@ from matplotlib import pyplot as plt
 
 File_Dir ="C:/HYPACK 2013/Projects/EDT_work/Raw/"
 file_outName = File_Dir + "XYZT_GPS.txt"
+gpsFile = "C:/FRF_Survey/frf traj test nc sp old nad83.txt"
+file_outName_post = File_Dir + "XYZT_PostProcess.txt"
 
-# create empty variables
+# create empty variables for hypack files
 X = []
 Y = []
 Z = []
 g_Time = []
+#create empty variables for post processed file
+X_post = []
+Y_post = []
+Z_post = []
+T_post = []
 
 for filename in os.listdir(File_Dir):
     if filename.endswith(".RAW"):
@@ -34,11 +41,26 @@ for filename in os.listdir(File_Dir):
 f.close()
 
 
+with open(gpsFile,"rb") as c:
+    for line in c:
+        gpsT = line.split()
+        tpart = gpsT[5]
+        T_part = tpart.replace(':','')
+        X_post.append(gpsT[1])
+        Y_post.append(gpsT[2])
+        Z_post.append(gpsT[3])
+        T_post.append(T_part)
+
+c.close()
+
+
 # numpy work - rearrange variables into column arrays
 # change text format to float for file write
 
+a = np.column_stack((X_post,Y_post,Z_post,T_post))
 b = np.column_stack((X,Y,Z,g_Time))
 c = b.astype(np.float)
+d = a.astype(np.float)
 
 # make plot to ensure validity
 plt.plot(X,Y,'.')
@@ -46,6 +68,7 @@ plt.show()
 
 # write file
 np.savetxt(file_outName,c,delimiter=",",fmt='%1.3f')
+np.savetxt(file_outName_post,d,delimiter=",",fmt='%1.3f')
 
 
 
